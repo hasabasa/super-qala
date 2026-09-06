@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import PostgresDsn, RedisDsn
+from pydantic import Field, PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,6 +41,14 @@ class Settings(BaseSettings):
 
     # --- Файловое хранилище (S3-совместимое) ---
     S3_ENDPOINT_URL: str = ""
+    S3_PUBLIC_ENDPOINT: str = Field(
+        default="",
+        description=(
+            "Адрес хранилища снаружи. Внутри сети контейнеров это minio:9000, "
+            "а браузеру и мобильному клиенту нужен внешний адрес — по нему "
+            "подписываются временные ссылки. Пусто — используется S3_ENDPOINT_URL"
+        ),
+    )
     S3_BUCKET: str = "smartqala"
     S3_ACCESS_KEY: str = ""
     S3_SECRET_KEY: str = ""

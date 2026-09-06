@@ -81,6 +81,16 @@ async def remind_payment_due(_: dict[str, Any]) -> int:
         return count
 
 
+async def cleanup_orphan_files(_: dict[str, Any]) -> int:
+    """Удаляет файлы, загруженные, но так и не привязанные к объекту."""
+    from app.modules.files.service import FilesService
+
+    async with SessionFactory() as session:
+        removed = await FilesService(session).cleanup_orphans()
+        await session.commit()
+        return removed
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     log.info("worker.started", at=datetime.now(UTC).isoformat())
 

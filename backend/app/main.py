@@ -10,9 +10,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.redis import redis_client
+from app.core.storage import ensure_bucket
 from app.modules.auth.router import router as auth_router
 from app.modules.billing.router import router as billing_router
 from app.modules.chat.router import router as chat_router
+from app.modules.files.router import router as files_router
 from app.modules.classifieds.router import router as classifieds_router
 from app.modules.finance.router import router as finance_router
 from app.modules.meters.router import router as meters_router
@@ -28,6 +30,7 @@ if settings.SENTRY_DSN:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+    await ensure_bucket()
     yield
     await redis_client.aclose()
 
@@ -69,3 +72,4 @@ app.include_router(meters_router, prefix=settings.API_PREFIX)
 app.include_router(voting_router, prefix=settings.API_PREFIX)
 app.include_router(finance_router, prefix=settings.API_PREFIX)
 app.include_router(classifieds_router, prefix=settings.API_PREFIX)
+app.include_router(files_router, prefix=settings.API_PREFIX)

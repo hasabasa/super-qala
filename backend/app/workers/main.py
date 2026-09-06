@@ -8,6 +8,7 @@ from arq.connections import RedisSettings
 
 from app.core.config import settings
 from app.workers.tasks import (
+    cleanup_orphan_files,
     deliver_notifications,
     mark_overdue_invoices,
     remind_payment_due,
@@ -18,7 +19,12 @@ from app.workers.tasks import (
 
 class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(str(settings.REDIS_URL))
-    functions = [deliver_notifications, mark_overdue_invoices, remind_payment_due]
+    functions = [
+        deliver_notifications,
+        mark_overdue_invoices,
+        remind_payment_due,
+        cleanup_orphan_files,
+    ]
     on_startup = startup
     on_shutdown = shutdown
     cron_jobs = [
@@ -26,4 +32,5 @@ class WorkerSettings:
         cron(deliver_notifications, minute=set(range(0, 60, 2))),
         cron(mark_overdue_invoices, hour=3, minute=0),
         cron(remind_payment_due, hour=9, minute=0),
+        cron(cleanup_orphan_files, hour=4, minute=0),
     ]

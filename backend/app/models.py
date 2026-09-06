@@ -26,6 +26,7 @@ from app.modules.chat.models import (
     MessageRead,
 )
 from app.modules.classifieds.models import Listing, ListingPhoto, ListingPromotion
+from app.modules.files.models import StoredFile
 from app.modules.finance.models import BudgetItem, BudgetPeriod
 from app.modules.meters.models import Meter, MeterReading
 from app.modules.notifications.models import (
@@ -98,6 +99,7 @@ __all__ = [
     "RequestCategory",
     "RequestEvent",
     "ServiceRequest",
+    "StoredFile",
     "ServiceType",
     "User",
     "UserRole",
