@@ -13,11 +13,14 @@ from app.core.redis import redis_client
 from app.modules.auth.router import router as auth_router
 from app.modules.billing.router import router as billing_router
 from app.modules.chat.router import router as chat_router
+from app.modules.classifieds.router import router as classifieds_router
+from app.modules.finance.router import router as finance_router
 from app.modules.meters.router import router as meters_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.properties.router import router as properties_router
 from app.modules.requests.router import router as requests_router
 from app.modules.residents.router import router as residents_router
+from app.modules.voting.router import router as voting_router
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(dsn=settings.SENTRY_DSN, environment=settings.ENV, traces_sample_rate=0.1)
@@ -63,3 +66,6 @@ app.include_router(requests_router, prefix=settings.API_PREFIX)
 app.include_router(chat_router, prefix=settings.API_PREFIX)
 app.include_router(notifications_router, prefix=settings.API_PREFIX)
 app.include_router(meters_router, prefix=settings.API_PREFIX)
+app.include_router(voting_router, prefix=settings.API_PREFIX)
+app.include_router(finance_router, prefix=settings.API_PREFIX)
+app.include_router(classifieds_router, prefix=settings.API_PREFIX)

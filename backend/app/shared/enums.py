@@ -209,3 +209,51 @@ class ReadingStatus(StrEnum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
+
+
+class MeetingType(StrEnum):
+    ANNUAL = "annual"
+    EXTRAORDINARY = "extraordinary"
+    SURVEY = "survey"
+
+
+class MeetingStatus(StrEnum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    FINISHED = "finished"
+    CANCELLED = "cancelled"
+
+
+class MajorityType(StrEnum):
+    """Какая доля голосов нужна для принятия решения."""
+
+    SIMPLE = "simple"
+    QUALIFIED = "qualified"
+    UNANIMOUS = "unanimous"
+
+
+class BudgetDirection(StrEnum):
+    INCOME = "income"
+    EXPENSE = "expense"
+
+
+class ListingType(StrEnum):
+    SELL = "sell"
+    BUY = "buy"
+    SERVICE = "service"
+    GIVE_AWAY = "give_away"
+
+
+class ListingStatus(StrEnum):
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    SOLD = "sold"
+    BLOCKED = "blocked"
+
+
+class PromotionType(StrEnum):
+    """Размещение бесплатное — платное убивает ликвидность доски.
+    Зарабатываем только на продвижении."""
+
+    PIN_TOP = "pin_top"
+    HIGHLIGHT = "highlight"

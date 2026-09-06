@@ -24,6 +24,8 @@ from app.modules.chat.models import (
     MessageAttachment,
     MessageRead,
 )
+from app.modules.classifieds.models import Listing, ListingPhoto, ListingPromotion
+from app.modules.finance.models import BudgetItem, BudgetPeriod
 from app.modules.meters.models import Meter, MeterReading
 from app.modules.notifications.models import (
     Device,
@@ -44,6 +46,13 @@ from app.modules.requests.models import (
     ServiceRequest,
 )
 from app.modules.residents.models import ApartmentResident, ApartmentVerificationCode
+from app.modules.voting.models import (
+    Ballot,
+    BallotAnswer,
+    Meeting,
+    MeetingQuestion,
+    MeetingResult,
+)
 
 __all__ = [
     "Account",
@@ -51,7 +60,11 @@ __all__ = [
     "ApartmentResident",
     "ApartmentVerificationCode",
     "Base",
+    "Ballot",
+    "BallotAnswer",
     "BillingPeriod",
+    "BudgetItem",
+    "BudgetPeriod",
     "Building",
     "Channel",
     "ChannelMember",
@@ -60,6 +73,12 @@ __all__ = [
     "Complex",
     "Entrance",
     "Invoice",
+    "Listing",
+    "ListingPhoto",
+    "ListingPromotion",
+    "Meeting",
+    "MeetingQuestion",
+    "MeetingResult",
     "Message",
     "MessageAttachment",
     "MessageRead",
