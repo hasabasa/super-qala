@@ -9,7 +9,8 @@
 веб-кабинет управляющей организации (ОСИ). Платит ОСИ по подписке, жильцы пользуются бесплатно.
 Пилот — ноябрь 2026.
 
-Бэкенд пишет основатель вместе с Claude Code. Flutter — наёмный подрядчик.
+Всё делается своими силами: основатель + Claude Code. Подрядчиков нет.
+Порядок работ: сначала бэкенд целиком, затем фронтенд.
 
 ## Стек
 
@@ -23,7 +24,7 @@ Python 3.12 · FastAPI · PostgreSQL 16 · SQLAlchemy 2.0 async · Alembic · Re
 | [docs/CONTEXT.md](docs/CONTEXT.md) | **Начни отсюда.** Полный контекст проекта |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Стек, структура модулей, полная схема БД |
 | [docs/PRODUCT.md](docs/PRODUCT.md) | Продуктовая концепция и бизнес-модель |
-| [docs/FRONTEND.md](docs/FRONTEND.md) | ТЗ Flutter-подрядчику, контракт API |
+| [docs/FRONTEND.md](docs/FRONTEND.md) | Спецификация клиента: экраны, дизайн-система, контракт API |
 | [sales-plan-valuation.md](sales-plan-valuation.md) | План продаж и тарифы |
 
 ## Правила работы
@@ -33,7 +34,7 @@ Python 3.12 · FastAPI · PostgreSQL 16 · SQLAlchemy 2.0 async · Alembic · Re
 - Устройство модуля одинаково для всех: `models / schemas / service / router / repository / exceptions`
 - Модуль обращается к другому только через его `service.py`
 - Суммы — целые тенге без копеек, идентификаторы — UUID, время — UTC и timezone-aware
-- Не менять контракт API молча: на него опирается фронтенд-подрядчик
+- Контракт API описан в `docs/FRONTEND.md §4` — меняешь код, обновляй документ
 - Окружение на новой машине ещё не поднято, настройку не начинать без просьбы
 
 ## Текущая задача
