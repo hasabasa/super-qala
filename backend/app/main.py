@@ -10,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.redis import redis_client
+from app.modules.auth.router import router as auth_router
+from app.modules.properties.router import router as properties_router
+from app.modules.residents.router import router as residents_router
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(dsn=settings.SENTRY_DSN, environment=settings.ENV, traces_sample_rate=0.1)
@@ -46,5 +49,7 @@ async def health() -> dict[str, str]:
     return {"status": "ok", "env": settings.ENV}
 
 
-# Роутеры модулей подключаются здесь по мере готовности:
-# app.include_router(auth.router, prefix=settings.API_PREFIX)
+# Роутеры модулей. Добавляя новый модуль — подключи его здесь.
+app.include_router(auth_router, prefix=settings.API_PREFIX)
+app.include_router(properties_router, prefix=settings.API_PREFIX)
+app.include_router(residents_router, prefix=settings.API_PREFIX)
