@@ -6,7 +6,11 @@ WORKDIR /app
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 COPY pyproject.toml ./
-RUN uv pip install --system --no-cache -r pyproject.toml
+ARG INSTALL_DEV=true
+RUN uv pip install --system --no-cache -r pyproject.toml && \
+    if [ "$INSTALL_DEV" = "true" ]; then \
+      uv pip install --system --no-cache pytest pytest-asyncio ruff mypy; \
+    fi
 
 COPY . .
 

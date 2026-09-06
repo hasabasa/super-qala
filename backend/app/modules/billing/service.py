@@ -259,11 +259,38 @@ class BillingService:
         period.published_at = datetime.now(UTC)
         await self.session.flush()
 
+        await self._notify_new_invoices(period_id)
+
         # Ранее пришедшие платежи могли ждать этих начислений
         await self._allocate_pending_payments(organization_id)
 
         log.info("billing.period_published", period=str(period_id), invoices=created)
         return created, total
+
+    async def _notify_new_invoices(self, period_id: uuid.UUID) -> None:
+        """Сообщает жильцам о выставленных квитанциях."""
+        from app.modules.notifications.service import NotificationService
+        from app.modules.residents.models import ApartmentResident
+        from app.shared.enums import NotificationType, ResidentStatus
+
+        rows = await self.session.execute(
+            select(Invoice, ApartmentResident.user_id)
+            .join(Account, Invoice.account_id == Account.id)
+            .join(ApartmentResident, ApartmentResident.apartment_id == Account.apartment_id)
+            .where(
+                Invoice.billing_period_id == period_id,
+                ApartmentResident.status == ResidentStatus.VERIFIED,
+            )
+        )
+        notifications = NotificationService(self.session)
+        for invoice, user_id in rows.all():
+            await notifications.notify(
+                user_id,
+                NotificationType.INVOICE_ISSUED,
+                "Новая квитанция",
+                f"К оплате {invoice.total_amount} ₸",
+                {"type": "invoice", "id": str(invoice.id)},
+            )
 
     # ------------------------------------------------------------------
     # Квитанции жильца

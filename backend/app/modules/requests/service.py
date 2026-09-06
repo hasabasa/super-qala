@@ -220,6 +220,18 @@ class RequestsService:
             )
         )
         await self.session.flush()
+
+        from app.modules.notifications.service import NotificationService
+        from app.shared.enums import NotificationType
+
+        await NotificationService(self.session).notify(
+            request.author_id,
+            NotificationType.REQUEST_STATUS,
+            f"Заявка №{request.number}",
+            f"Статус изменён: {new_status}",
+            {"type": "request", "id": str(request.id)},
+        )
+
         log.info("requests.status_changed", request=str(request_id), status=new_status)
         return request
 

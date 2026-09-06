@@ -24,6 +24,12 @@ from app.modules.chat.models import (
     MessageAttachment,
     MessageRead,
 )
+from app.modules.meters.models import Meter, MeterReading
+from app.modules.notifications.models import (
+    Device,
+    Notification,
+    NotificationPreference,
+)
 from app.modules.properties.models import (
     Apartment,
     Building,
@@ -49,6 +55,7 @@ __all__ = [
     "Building",
     "Channel",
     "ChannelMember",
+    "Device",
     "Charge",
     "Complex",
     "Entrance",
@@ -56,6 +63,10 @@ __all__ = [
     "Message",
     "MessageAttachment",
     "MessageRead",
+    "Meter",
+    "MeterReading",
+    "Notification",
+    "NotificationPreference",
     "Organization",
     "PaymentClaim",
     "PaymentFact",

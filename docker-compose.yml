@@ -39,6 +39,15 @@ services:
       db: {condition: service_healthy}
       redis: {condition: service_healthy}
 
+  worker:
+    build: ./backend
+    command: arq app.workers.main.WorkerSettings
+    env_file: .env
+    volumes: ["./backend:/app"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+
 volumes:
   pgdata:
   miniodata:

@@ -163,3 +163,49 @@ class ChannelType(StrEnum):
 class ChannelMemberRole(StrEnum):
     MEMBER = "member"
     MODERATOR = "moderator"
+
+
+class NotificationType(StrEnum):
+    """Тип уведомления. Определяет текст, приоритет и экран перехода."""
+
+    INVOICE_ISSUED = "invoice_issued"
+    PAYMENT_CONFIRMED = "payment_confirmed"
+    PAYMENT_DUE_SOON = "payment_due_soon"
+    REQUEST_STATUS = "request_status"
+    REQUEST_COMMENT = "request_comment"
+    ANNOUNCEMENT = "announcement"
+    CHAT_MESSAGE = "chat_message"
+    METER_REMINDER = "meter_reminder"
+    APARTMENT_VERIFIED = "apartment_verified"
+    VOTING_STARTED = "voting_started"
+
+
+class NotificationChannel(StrEnum):
+    PUSH = "push"
+    SMS = "sms"
+    IN_APP = "in_app"
+
+
+class NotificationStatus(StrEnum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+class DevicePlatform(StrEnum):
+    IOS = "ios"
+    ANDROID = "android"
+    WEB = "web"
+
+
+class ReadingSource(StrEnum):
+    MANUAL = "manual"
+    OCR = "ocr"
+    OSI_IMPORT = "osi_import"
+
+
+class ReadingStatus(StrEnum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
