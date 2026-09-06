@@ -17,12 +17,25 @@ from app.modules.billing.models import (
     ServiceType,
 )
 from app.modules.auth.models import PhoneVerification, RefreshToken, User, UserRole
+from app.modules.chat.models import (
+    Channel,
+    ChannelMember,
+    Message,
+    MessageAttachment,
+    MessageRead,
+)
 from app.modules.properties.models import (
     Apartment,
     Building,
     Complex,
     Entrance,
     Organization,
+)
+from app.modules.requests.models import (
+    RequestAttachment,
+    RequestCategory,
+    RequestEvent,
+    ServiceRequest,
 )
 from app.modules.residents.models import ApartmentResident, ApartmentVerificationCode
 
@@ -34,16 +47,25 @@ __all__ = [
     "Base",
     "BillingPeriod",
     "Building",
+    "Channel",
+    "ChannelMember",
     "Charge",
     "Complex",
     "Entrance",
     "Invoice",
+    "Message",
+    "MessageAttachment",
+    "MessageRead",
     "Organization",
     "PaymentClaim",
     "PaymentFact",
     "PhoneVerification",
     "ReconciliationEntry",
     "RefreshToken",
+    "RequestAttachment",
+    "RequestCategory",
+    "RequestEvent",
+    "ServiceRequest",
     "ServiceType",
     "User",
     "UserRole",

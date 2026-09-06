@@ -114,3 +114,52 @@ class ReconciliationAction(StrEnum):
     UNMATCHED = "unmatched"
     CLAIM_CONFIRMED = "claim_confirmed"
     CLAIM_REJECTED = "claim_rejected"
+
+
+class RequestStatus(StrEnum):
+    NEW = "new"
+    ACCEPTED = "accepted"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+    REJECTED = "rejected"
+    CLOSED = "closed"
+
+
+class RequestPriority(StrEnum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    EMERGENCY = "emergency"
+
+
+class RequestPlace(StrEnum):
+    """Где проблема. Влияет на то, кто её видит."""
+
+    APARTMENT = "apartment"
+    ENTRANCE = "entrance"
+    BUILDING = "building"
+    YARD = "yard"
+
+
+class RequestEventType(StrEnum):
+    CREATED = "created"
+    STATUS_CHANGED = "status_changed"
+    COMMENT = "comment"
+    ASSIGNED = "assigned"
+    RATED = "rated"
+
+
+class ChannelType(StrEnum):
+    """Разделение на каналы обязательно: один общий чат на 300 человек
+    превращается в помойку, и люди уходят обратно в WhatsApp."""
+
+    ANNOUNCEMENTS = "announcements"
+    COMPLEX = "complex"
+    BUILDING = "building"
+    ENTRANCE = "entrance"
+    MARKETPLACE = "marketplace"
+
+
+class ChannelMemberRole(StrEnum):
+    MEMBER = "member"
+    MODERATOR = "moderator"
