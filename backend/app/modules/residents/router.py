@@ -5,7 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.core.deps import CurrentUser, DbSession, OrganizationScope
+from app.core.deps import CurrentUser, DbSession, Scope
 from app.modules.properties.service import PropertiesService
 from app.modules.residents.schemas import (
     ApartmentBrief,
@@ -98,7 +98,7 @@ async def list_pending(
     organization_id: uuid.UUID,
     service: ServiceDep,
     session: DbSession,
-    scope: OrganizationScope,
+    scope: Scope,
 ) -> list[PendingResidentOut]:
     PropertiesService(session).ensure_access(organization_id, scope)
     rows = await service.list_pending(organization_id)
@@ -131,7 +131,7 @@ async def approve(
     admin: CurrentUser,
     service: ServiceDep,
     session: DbSession,
-    scope: OrganizationScope,
+    scope: Scope,
 ) -> ResidentOut:
     resident = await service.get_resident(resident_id)
     properties = PropertiesService(session)
@@ -151,7 +151,7 @@ async def reject(
     admin: CurrentUser,
     service: ServiceDep,
     session: DbSession,
-    scope: OrganizationScope,
+    scope: Scope,
 ) -> ResidentOut:
     resident = await service.get_resident(resident_id)
     properties = PropertiesService(session)

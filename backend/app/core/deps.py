@@ -2,6 +2,7 @@
 
 import uuid
 from collections.abc import Callable, Coroutine
+from dataclasses import dataclass
 from typing import Annotated, Any
 
 from fastapi import Depends, Header
@@ -51,13 +52,34 @@ def require_roles(
     return checker
 
 
-async def get_organization_scope(user: CurrentUser) -> set[uuid.UUID]:
-    """Организации, данные которых пользователь вправе видеть.
+@dataclass(frozen=True)
+class AccessScope:
+    """Границы доступа пользователя к данным организаций.
 
-    Накладывается на запросы фильтром — администратор ОСИ физически
-    не может получить данные чужого ЖК.
+    Администратор ОСИ видит только свои организации; администратор
+    платформы — все. Проверка идёт через allows(), а не сравнением
+    множеств, иначе роль без организации (platform_admin) отсекает сама себя.
     """
-    return {r.organization_id for r in user.roles if r.organization_id is not None}
+
+    organization_ids: frozenset[uuid.UUID]
+    is_platform_admin: bool
+
+    def allows(self, organization_id: uuid.UUID) -> bool:
+        return self.is_platform_admin or organization_id in self.organization_ids
+
+    def ensure(self, organization_id: uuid.UUID) -> None:
+        if not self.allows(organization_id):
+            raise PermissionDeniedError("Нет доступа к этой организации")
 
 
-OrganizationScope = Annotated[set[uuid.UUID], Depends(get_organization_scope)]
+async def get_access_scope(user: CurrentUser) -> AccessScope:
+    roles = user.roles
+    return AccessScope(
+        organization_ids=frozenset(
+            r.organization_id for r in roles if r.organization_id is not None
+        ),
+        is_platform_admin=any(r.role == UserRoleType.PLATFORM_ADMIN for r in roles),
+    )
+
+
+Scope = Annotated[AccessScope, Depends(get_access_scope)]

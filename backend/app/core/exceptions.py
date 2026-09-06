@@ -54,7 +54,7 @@ class RateLimitError(AppError):
 
 
 class ValidationError(AppError):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = 422
     code = "validation_error"
     message = "Некорректные данные"
 

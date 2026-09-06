@@ -9,7 +9,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.core.deps import CurrentUser, DbSession, OrganizationScope, require_roles
+from app.core.deps import CurrentUser, DbSession, Scope, require_roles
 from app.modules.auth.models import User
 from app.shared.enums import UserRoleType
 from app.modules.properties.schemas import (
@@ -23,6 +23,8 @@ from app.modules.properties.schemas import (
     ComplexSearchOut,
     EntranceCreateIn,
     EntranceOut,
+    GrantRoleIn,
+    GrantRoleOut,
     OrganizationCreateIn,
     OrganizationOut,
 )
@@ -69,7 +71,7 @@ async def create_organization(
 
 @router.get("/organizations/{organization_id}", response_model=OrganizationOut)
 async def get_organization(
-    organization_id: uuid.UUID, service: ServiceDep, scope: OrganizationScope
+    organization_id: uuid.UUID, service: ServiceDep, scope: Scope
 ) -> OrganizationOut:
     service.ensure_access(organization_id, scope)
     return OrganizationOut.model_validate(await service.get_organization(organization_id))
@@ -77,7 +79,7 @@ async def get_organization(
 
 @router.get("/organizations/{organization_id}/complexes", response_model=list[ComplexOut])
 async def list_complexes(
-    organization_id: uuid.UUID, service: ServiceDep, scope: OrganizationScope
+    organization_id: uuid.UUID, service: ServiceDep, scope: Scope
 ) -> list[ComplexOut]:
     service.ensure_access(organization_id, scope)
     return [ComplexOut.model_validate(c) for c in await service.list_complexes(organization_id)]
@@ -92,7 +94,7 @@ async def create_complex(
     organization_id: uuid.UUID,
     payload: ComplexCreateIn,
     service: ServiceDep,
-    scope: OrganizationScope,
+    scope: Scope,
 ) -> ComplexOut:
     service.ensure_access(organization_id, scope)
     return ComplexOut.model_validate(await service.create_complex(organization_id, payload))
@@ -112,7 +114,7 @@ async def create_building(
     complex_id: uuid.UUID,
     payload: BuildingCreateIn,
     service: ServiceDep,
-    scope: OrganizationScope,
+    scope: Scope,
 ) -> BuildingOut:
     complex_ = await service.get_complex(complex_id)
     service.ensure_access(complex_.organization_id, scope)
@@ -162,3 +164,20 @@ async def bulk_create_apartments(
 ) -> list[ApartmentOut]:
     created = await service.bulk_create_apartments(payload)
     return [ApartmentOut.model_validate(a) for a in created]
+
+
+@router.post(
+    "/organizations/{organization_id}/staff",
+    response_model=GrantRoleOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Назначить сотрудника организации",
+)
+async def grant_role(
+    organization_id: uuid.UUID,
+    payload: GrantRoleIn,
+    service: ServiceDep,
+    scope: Scope,
+) -> GrantRoleOut:
+    service.ensure_access(organization_id, scope)
+    user, role = await service.grant_role(organization_id, payload)
+    return GrantRoleOut(user_id=user.id, phone=user.phone, role=role)

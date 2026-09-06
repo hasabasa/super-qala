@@ -5,7 +5,8 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictError, NotFoundError, PermissionDeniedError
+from app.core.deps import AccessScope
+from app.core.exceptions import ConflictError, NotFoundError
 from app.modules.properties.models import (
     Apartment,
     Building,
@@ -13,14 +14,17 @@ from app.modules.properties.models import (
     Entrance,
     Organization,
 )
+from app.modules.auth.models import User, UserRole
 from app.modules.properties.schemas import (
     ApartmentBulkCreateIn,
     ApartmentCreateIn,
     BuildingCreateIn,
     ComplexCreateIn,
     EntranceCreateIn,
+    GrantRoleIn,
     OrganizationCreateIn,
 )
+from app.shared.phone import normalize_phone
 
 
 class PropertiesService:
@@ -50,10 +54,10 @@ class PropertiesService:
             raise NotFoundError("Организация не найдена")
         return organization
 
-    def ensure_access(self, organization_id: uuid.UUID, scope: set[uuid.UUID]) -> None:
+    @staticmethod
+    def ensure_access(organization_id: uuid.UUID, scope: AccessScope) -> None:
         """Проверяет, что пользователь вправе работать с этой организацией."""
-        if organization_id not in scope:
-            raise PermissionDeniedError("Нет доступа к этой организации")
+        scope.ensure(organization_id)
 
     # ------------------------------------------------------------------
     # Жилые комплексы и дома
@@ -204,3 +208,36 @@ class PropertiesService:
         if organization_id is None:
             raise NotFoundError("Квартира не найдена")
         return organization_id
+
+    # ------------------------------------------------------------------
+    # Сотрудники организации
+    # ------------------------------------------------------------------
+
+    async def grant_role(
+        self, organization_id: uuid.UUID, payload: GrantRoleIn
+    ) -> tuple[User, str]:
+        """Назначает роль в организации. Если пользователя нет — создаёт по телефону."""
+        await self.get_organization(organization_id)
+        phone = normalize_phone(payload.phone)
+
+        user = await self.session.scalar(select(User).where(User.phone == phone))
+        if user is None:
+            user = User(phone=phone)
+            self.session.add(user)
+            await self.session.flush()
+
+        existing = await self.session.scalar(
+            select(UserRole).where(
+                UserRole.user_id == user.id,
+                UserRole.organization_id == organization_id,
+                UserRole.role == payload.role,
+            )
+        )
+        if existing is not None:
+            raise ConflictError("Эта роль у пользователя уже есть")
+
+        self.session.add(
+            UserRole(user_id=user.id, organization_id=organization_id, role=payload.role)
+        )
+        await self.session.flush()
+        return user, payload.role

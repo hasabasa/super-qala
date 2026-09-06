@@ -23,7 +23,12 @@ class User(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    roles: Mapped[list["UserRole"]] = relationship(back_populates="user", lazy="selectin")
+    # foreign_keys обязателен: UserRole ссылается на users дважды — user_id и granted_by
+    roles: Mapped[list["UserRole"]] = relationship(
+        back_populates="user",
+        foreign_keys="UserRole.user_id",
+        lazy="selectin",
+    )
 
     @property
     def full_name(self) -> str:

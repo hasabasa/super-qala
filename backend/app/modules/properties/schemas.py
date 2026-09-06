@@ -98,3 +98,18 @@ class ApartmentBulkCreateIn(BaseModel):
     count: int = Field(ge=1, le=500)
     apartments_per_floor: int = Field(default=4, ge=1, le=50)
     first_floor: int = Field(default=1)
+
+
+class GrantRoleIn(BaseModel):
+    """Назначение сотрудника организации. Пользователь создаётся, если его ещё нет."""
+
+    phone: str
+    role: str = Field(
+        default="osi_admin", pattern="^(osi_admin|osi_moderator|osi_finance)$"
+    )
+
+
+class GrantRoleOut(BaseModel):
+    user_id: uuid.UUID
+    phone: str
+    role: str
