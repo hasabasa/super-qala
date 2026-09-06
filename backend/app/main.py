@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.redis import redis_client
 from app.modules.auth.router import router as auth_router
+from app.modules.billing.router import router as billing_router
 from app.modules.properties.router import router as properties_router
 from app.modules.residents.router import router as residents_router
 
@@ -52,4 +53,5 @@ async def health() -> dict[str, str]:
 # Роутеры модулей. Добавляя новый модуль — подключи его здесь.
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(properties_router, prefix=settings.API_PREFIX)
+app.include_router(billing_router, prefix=settings.API_PREFIX)
 app.include_router(residents_router, prefix=settings.API_PREFIX)

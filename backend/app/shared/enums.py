@@ -68,3 +68,49 @@ class VerificationMethod(StrEnum):
     RECEIPT_CODE = "receipt_code"
     OSI_ADMIN = "osi_admin"
     OWNER_INVITE = "owner_invite"
+
+
+class BillingPeriodStatus(StrEnum):
+    """Черновик виден только организации; опубликованный — жильцам."""
+
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    CLOSED = "closed"
+
+
+class InvoiceStatus(StrEnum):
+    ISSUED = "issued"
+    AWAITING_CONFIRMATION = "awaiting_confirmation"
+    PARTIALLY_PAID = "partially_paid"
+    PAID = "paid"
+    OVERDUE = "overdue"
+
+
+class PaymentClaimStatus(StrEnum):
+    """Заявление жильца об оплате. Истина — не здесь, а в PaymentFact."""
+
+    PENDING = "pending"
+    MATCHED = "matched"
+    REJECTED = "rejected"
+
+
+class PaymentClaimSource(StrEnum):
+    KASPI_DEEPLINK = "kaspi_deeplink"
+    MANUAL_RECEIPT = "manual_receipt"
+    CASH = "cash"
+
+
+class PaymentFactSource(StrEnum):
+    """Откуда пришёл подтверждённый платёж."""
+
+    KASPI_REGISTRY = "kaspi_registry"
+    BANK_STATEMENT = "bank_statement"
+    MANUAL = "manual"
+
+
+class ReconciliationAction(StrEnum):
+    AUTO_MATCHED = "auto_matched"
+    MANUAL_MATCHED = "manual_matched"
+    UNMATCHED = "unmatched"
+    CLAIM_CONFIRMED = "claim_confirmed"
+    CLAIM_REJECTED = "claim_rejected"
