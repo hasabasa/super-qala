@@ -207,3 +207,44 @@ class DebtorOut(BaseModel):
     account_number: str
     debt: int
     overdue_invoices: int
+
+
+# --------------------------------------------------------------------------
+# Способы оплаты
+# --------------------------------------------------------------------------
+
+
+class PaymentMethodIn(BaseModel):
+    type: str = Field(pattern="^(bank_transfer|qr_code|deeplink|cash|custom)$")
+    title: str = Field(max_length=150)
+    instructions: str | None = None
+    requisites: dict[str, str] | None = Field(
+        default=None, description="Произвольные реквизиты: банк, ИИК, БИК, получатель"
+    )
+    qr_url: str | None = Field(default=None, max_length=500)
+    deeplink_template: str | None = Field(
+        default=None,
+        max_length=500,
+        description="Шаблон ссылки с подстановками {account}, {amount}, {period}",
+    )
+    order_num: int = 0
+
+
+class PaymentMethodOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    type: str
+    title: str
+    instructions: str | None
+    requisites: dict[str, str] | None
+    qr_url: str | None
+    order_num: int
+
+
+class PaymentOptionOut(PaymentMethodOut):
+    """Способ оплаты с подставленными данными конкретной квитанции."""
+
+    payment_link: str | None
+    amount: int
+    account_number: str

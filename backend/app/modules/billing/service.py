@@ -22,6 +22,7 @@ from app.modules.billing.models import (
     Invoice,
     PaymentClaim,
     PaymentFact,
+    PaymentMethod,
     ReconciliationEntry,
     ServiceType,
 )
@@ -31,6 +32,7 @@ from app.modules.billing.schemas import (
     ChargeImportIn,
     ChargeImportOut,
     PaymentClaimIn,
+    PaymentMethodIn,
     PaymentRegistryImportIn,
     PaymentRegistryImportOut,
     ServiceTypeIn,
@@ -665,3 +667,70 @@ class BillingService:
     @staticmethod
     def ensure_access(organization_id: uuid.UUID, scope: AccessScope) -> None:
         scope.ensure(organization_id)
+
+    # ------------------------------------------------------------------
+    # Способы оплаты
+    # ------------------------------------------------------------------
+
+    async def create_payment_method(
+        self, organization_id: uuid.UUID, payload: PaymentMethodIn
+    ) -> PaymentMethod:
+        method = PaymentMethod(organization_id=organization_id, **payload.model_dump())
+        self.session.add(method)
+        await self.session.flush()
+        return method
+
+    async def list_payment_methods(self, organization_id: uuid.UUID) -> list[PaymentMethod]:
+        result = await self.session.scalars(
+            select(PaymentMethod)
+            .where(
+                PaymentMethod.organization_id == organization_id,
+                PaymentMethod.is_active.is_(True),
+            )
+            .order_by(PaymentMethod.order_num, PaymentMethod.title)
+        )
+        return list(result.all())
+
+    async def delete_payment_method(
+        self, organization_id: uuid.UUID, method_id: uuid.UUID
+    ) -> None:
+        method = await self.session.get(PaymentMethod, method_id)
+        if method is None or method.organization_id != organization_id:
+            raise NotFoundError("Способ оплаты не найден")
+        method.is_active = False
+        await self.session.flush()
+
+    async def payment_options(self, invoice_id: uuid.UUID) -> list[dict]:
+        """Способы оплаты с подставленными данными квитанции."""
+        invoice = await self.get_invoice(invoice_id)
+        account = await self.session.get(Account, invoice.account_id)
+        if account is None:
+            raise NotFoundError("Лицевой счёт не найден")
+
+        period = await self.get_period(invoice.billing_period_id)
+        methods = await self.list_payment_methods(account.organization_id)
+
+        options: list[dict] = []
+        for method in methods:
+            link = None
+            if method.deeplink_template:
+                link = (
+                    method.deeplink_template.replace("{account}", account.external_number)
+                    .replace("{amount}", str(invoice.outstanding))
+                    .replace("{period}", f"{period.month:02d}.{period.year}")
+                )
+            options.append(
+                {
+                    "id": method.id,
+                    "type": method.type,
+                    "title": method.title,
+                    "instructions": method.instructions,
+                    "requisites": method.requisites,
+                    "qr_url": method.qr_url,
+                    "order_num": method.order_num,
+                    "payment_link": link,
+                    "amount": invoice.outstanding,
+                    "account_number": account.external_number,
+                }
+            )
+        return options

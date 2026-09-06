@@ -13,6 +13,7 @@ from app.modules.billing.models import (
     Invoice,
     PaymentClaim,
     PaymentFact,
+    PaymentMethod,
     ReconciliationEntry,
     ServiceType,
 )
@@ -89,6 +90,7 @@ __all__ = [
     "Organization",
     "PaymentClaim",
     "PaymentFact",
+    "PaymentMethod",
     "PhoneVerification",
     "ReconciliationEntry",
     "RefreshToken",

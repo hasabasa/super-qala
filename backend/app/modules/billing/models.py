@@ -16,6 +16,7 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -29,6 +30,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -249,3 +251,35 @@ class ReconciliationEntry(Base, TimestampMixin):
     amount: Mapped[int | None] = mapped_column(Integer)
     performed_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     note: Mapped[str | None] = mapped_column(String(300))
+
+
+class PaymentMethod(Base, TimestampMixin):
+    """Способ оплаты, настроенный организацией.
+
+    Платёжный провайдер сознательно не зашит в систему. Организация
+    указывает свои реквизиты, QR или ссылку — приложение показывает
+    то, что настроено. Заменить провайдера можно без изменения кода.
+    """
+
+    __tablename__ = "payment_methods"
+    __table_args__ = (Index("ix_payment_methods_org", "organization_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(PgUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    type: Mapped[str] = mapped_column(String(20), nullable=False)
+    title: Mapped[str] = mapped_column(String(150), nullable=False)
+    instructions: Mapped[str | None] = mapped_column(
+        Text, comment="Что сделать жильцу — показывается на экране оплаты"
+    )
+    requisites: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, comment="Произвольные реквизиты: банк, ИИК, БИК, получатель"
+    )
+    qr_url: Mapped[str | None] = mapped_column(String(500))
+    deeplink_template: Mapped[str | None] = mapped_column(
+        String(500),
+        comment="Шаблон ссылки с подстановками {account}, {amount}, {period}",
+    )
+    order_num: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

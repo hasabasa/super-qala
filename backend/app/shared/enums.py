@@ -257,3 +257,14 @@ class PromotionType(StrEnum):
 
     PIN_TOP = "pin_top"
     HIGHLIGHT = "highlight"
+
+
+class PaymentMethodType(StrEnum):
+    """Как жилец оплачивает. Провайдер не зашит в систему: организация
+    указывает свой способ, приложение показывает то, что настроено."""
+
+    BANK_TRANSFER = "bank_transfer"
+    QR_CODE = "qr_code"
+    DEEPLINK = "deeplink"
+    CASH = "cash"
+    CUSTOM = "custom"

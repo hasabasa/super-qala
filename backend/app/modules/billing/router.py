@@ -28,6 +28,9 @@ from app.modules.billing.schemas import (
     PaymentClaimIn,
     PaymentClaimOut,
     PaymentFactOut,
+    PaymentMethodIn,
+    PaymentMethodOut,
+    PaymentOptionOut,
     PaymentRegistryImportIn,
     PaymentRegistryImportOut,
     PublishPeriodOut,
@@ -310,3 +313,67 @@ async def collection_summary(
 ) -> dict:
     service.ensure_access(organization_id, scope)
     return await service.collection_summary(organization_id, period_id)
+
+
+# ======================================================================
+# Способы оплаты
+# ======================================================================
+
+
+@router.get(
+    "/billing/invoices/{invoice_id}/payment-options",
+    response_model=list[PaymentOptionOut],
+    summary="Как оплатить эту квитанцию",
+)
+async def payment_options(
+    invoice_id: uuid.UUID, user: CurrentUser, service: ServiceDep, session: DbSession
+) -> list[PaymentOptionOut]:
+    apartment_id = await service.get_invoice_apartment(invoice_id)
+    if apartment_id not in await _billing_apartments(session, user.id):
+        raise PermissionDeniedError("Нет доступа к этой квитанции")
+    return [PaymentOptionOut(**option) for option in await service.payment_options(invoice_id)]
+
+
+@router.get(
+    "/organizations/{organization_id}/payment-methods",
+    response_model=list[PaymentMethodOut],
+    summary="Настроенные способы оплаты",
+)
+async def list_payment_methods(
+    organization_id: uuid.UUID, service: ServiceDep, scope: Scope
+) -> list[PaymentMethodOut]:
+    service.ensure_access(organization_id, scope)
+    return [
+        PaymentMethodOut.model_validate(m)
+        for m in await service.list_payment_methods(organization_id)
+    ]
+
+
+@router.post(
+    "/organizations/{organization_id}/payment-methods",
+    response_model=PaymentMethodOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Настроить способ оплаты",
+)
+async def create_payment_method(
+    organization_id: uuid.UUID,
+    payload: PaymentMethodIn,
+    service: ServiceDep,
+    scope: Scope,
+) -> PaymentMethodOut:
+    service.ensure_access(organization_id, scope)
+    return PaymentMethodOut.model_validate(
+        await service.create_payment_method(organization_id, payload)
+    )
+
+
+@router.delete(
+    "/organizations/{organization_id}/payment-methods/{method_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Отключить способ оплаты",
+)
+async def delete_payment_method(
+    organization_id: uuid.UUID, method_id: uuid.UUID, service: ServiceDep, scope: Scope
+) -> None:
+    service.ensure_access(organization_id, scope)
+    await service.delete_payment_method(organization_id, method_id)
